@@ -7,7 +7,7 @@ import request from "supertest";
 import AppError from "../src/utils/AppError.js";
 import errorMiddleware from "../src/middleware/error.middleware.js";
 
-// Create a separate Express app for testing errors
+// Express app for testing errors
 const testApp = express();
 
 testApp.get("/operational-error", (req, res, next) => {
