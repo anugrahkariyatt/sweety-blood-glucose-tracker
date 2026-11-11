@@ -38,7 +38,10 @@ export const createReadingSchema = z.object({
 
     value: z
         .number({
-            error: "Value must be a number.",
+            error: (issue) =>
+                issue.input === undefined
+                    ? "Please enter a glucose value."
+                    : "Value must be a number.",
         })
         .int("Value must be a whole number.")
         .min(40, "Value must be between 40 and 600 mg/dl.")
