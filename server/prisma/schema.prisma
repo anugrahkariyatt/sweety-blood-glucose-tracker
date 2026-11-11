@@ -1,9 +1,18 @@
+
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum ReadingSlot {
+  MORNING
+  AFTER_BREAKFAST
+  AFTER_LUNCH
+  AFTER_DINNER
 }
 
 model User {
@@ -17,14 +26,14 @@ model User {
 }
 
 model Reading {
-  id        String   @id @default(uuid())
+  id        String      @id @default(uuid())
   value     Int
-  date      DateTime @db.Date
-  slot      String
+  date      DateTime    @db.Date
+  slot      ReadingSlot
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   @@unique([userId, date, slot])
 }
