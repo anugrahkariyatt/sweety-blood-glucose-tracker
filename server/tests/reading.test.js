@@ -1,0 +1,121 @@
+
+import { describe, it, before, after } from "node:test";
+import assert from "node:assert/strict";
+import request from "supertest";
+import { randomUUID } from "node:crypto";
+
+import app from "../src/app.js";
+import prisma from "../src/config/prisma.js";
+
+describe("Reading API - CRUD Operations", () => {
+    const testEmail = `reading-${randomUUID()}@example.com`;
+    const password = "password123";
+
+    let agent;
+    let userId;
+    let readingId;
+
+    before(async () => {
+        await prisma.$connect();
+
+        const registerResponse = await request(app)
+            .post("/api/auth/register")
+            .send({
+                name: "Reading Test User",
+                email: testEmail,
+                password,
+            });
+
+        assert.equal(registerResponse.status, 201);
+
+        const user = await prisma.user.findUnique({
+            where: { email: testEmail },
+        });
+
+        assert.ok(user);
+        userId = user.id;
+
+        agent = request.agent(app);
+
+        const loginResponse = await agent
+            .post("/api/auth/login")
+            .send({
+                email: testEmail,
+                password,
+            });
+
+        assert.equal(loginResponse.status, 200);
+    });
+
+    after(async () => {
+        if (userId) {
+            await prisma.reading.deleteMany({
+                where: { userId },
+            });
+
+            await prisma.user.deleteMany({
+                where: { id: userId },
+            });
+        }
+
+        await prisma.$disconnect();
+    });
+
+
+    it("should create a reading successfully", async () => {
+        const response = await agent
+            .post("/api/readings")
+            .send({
+                date: "2026-11-10",
+                slot: "MORNING",
+                value: 120,
+            });
+
+        assert.equal(response.status, 201);
+        assert.equal(response.body.success, true);
+        assert.equal(
+            response.body.message,
+            "Reading created successfully."
+        );
+
+        assert.equal(response.body.data.value, 120);
+        assert.equal(response.body.data.slot, "MORNING");
+
+        readingId = response.body.data.id;
+
+        const reading = await prisma.reading.findUnique({
+            where: { id: readingId },
+        });
+
+        assert.ok(reading);
+        assert.equal(reading.userId, userId);
+        assert.equal(reading.value, 120);
+    });
+
+    it("should reject invalid reading data", async () => {
+        const response = await agent
+            .post("/api/readings")
+            .send({
+                date: "invalid-date",
+                slot: "NIGHT",
+                value: 700,
+            });
+
+        assert.equal(response.status, 400);
+        assert.equal(response.body.success, false);
+    });
+
+    it("should reject reading creation without authentication", async () => {
+        const response = await request(app)
+            .post("/api/readings")
+            .send({
+                date: "2026-11-10",
+                slot: "MORNING",
+                value: 120,
+            });
+
+        assert.equal(response.status, 401);
+        assert.equal(response.body.success, false);
+    });
+
+});

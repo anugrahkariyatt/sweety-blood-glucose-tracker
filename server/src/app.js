@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.routes.js";
+import readingRoutes from "./routes/reading.routes.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 
 
@@ -27,7 +28,7 @@ app.get("/", (req, res) => {
 });
 // API Routes
 app.use("/api/auth", authRoutes);
-
+app.use("/api/readings", readingRoutes);
 
 app.use(errorMiddleware);
 
