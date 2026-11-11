@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push"
+    "test": "node --test",
+    "prisma:generate": "prisma generate"
   },
   "keywords": [],
   "author": "",
