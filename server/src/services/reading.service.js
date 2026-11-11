@@ -34,3 +34,33 @@ export const getReadingById = async (userId, readingId) => {
         },
     });
 };
+
+
+
+export const updateReading = async (userId, readingId, data) => {
+    const { date, slot, value } = data;
+
+    const existingReading = await prisma.reading.findFirst({
+        where: {
+            id: readingId,
+            userId,
+        },
+    });
+
+    if (!existingReading) {
+        return null;
+    }
+
+    return await prisma.reading.update({
+        where: {
+            id: readingId,
+        },
+        data: {
+            ...(date !== undefined && {
+                date: new Date(`${date}T00:00:00.000Z`),
+            }),
+            ...(slot !== undefined && { slot }),
+            ...(value !== undefined && { value }),
+        },
+    });
+};

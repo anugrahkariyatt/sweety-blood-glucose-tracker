@@ -57,3 +57,27 @@ export const getReadingById = async (req, res, next) => {
         next(error);
     }
 };
+
+export const updateReading = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const reading = await readingService.updateReading(
+            req.user.userId,
+            id,
+            req.body
+        );
+
+        if (!reading) {
+            return next(new AppError("Reading not found.", 404));
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Reading updated successfully.",
+            data: reading,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

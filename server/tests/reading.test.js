@@ -161,4 +161,60 @@ describe("Reading API - CRUD Operations", () => {
         assert.equal(response.body.success, false);
     });
 
+    it("should update a reading successfully", async () => {
+        const response = await agent
+            .patch(`/api/readings/${readingId}`)
+            .send({
+                value: 150,
+            });
+
+        assert.equal(response.status, 200);
+        assert.equal(response.body.success, true);
+        assert.equal(
+            response.body.message,
+            "Reading updated successfully."
+        );
+        assert.equal(response.body.data.value, 150);
+
+        // Verify database update
+        const reading = await prisma.reading.findUnique({
+            where: { id: readingId },
+        });
+
+        assert.equal(reading.value, 150);
+    });
+
+    it("should reject invalid reading updates", async () => {
+        const response = await agent
+            .patch(`/api/readings/${readingId}`)
+            .send({
+                value: 700,
+            });
+
+        assert.equal(response.status, 400);
+        assert.equal(response.body.success, false);
+    });
+
+    it("should return 404 when updating a non-existing reading", async () => {
+        const response = await agent
+            .patch(`/api/readings/${randomUUID()}`)
+            .send({
+                value: 160,
+            });
+
+        assert.equal(response.status, 404);
+        assert.equal(response.body.success, false);
+    });
+
+    it("should reject updating a reading without authentication", async () => {
+        const response = await request(app)
+            .patch(`/api/readings/${readingId}`)
+            .send({
+                value: 150,
+            });
+
+        assert.equal(response.status, 401);
+        assert.equal(response.body.success, false);
+    });
+
 });
