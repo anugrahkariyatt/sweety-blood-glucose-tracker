@@ -118,4 +118,47 @@ describe("Reading API - CRUD Operations", () => {
         assert.equal(response.body.success, false);
     });
 
+    it("should get all readings for the authenticated user", async () => {
+        const response = await agent.get("/api/readings");
+
+        assert.equal(response.status, 200);
+        assert.equal(response.body.success, true);
+        assert.ok(Array.isArray(response.body.data));
+        assert.ok(response.body.data.length >= 1);
+    });
+
+    it("should reject getting readings without authentication", async () => {
+        const response = await request(app)
+            .get("/api/readings");
+
+        assert.equal(response.status, 401);
+        assert.equal(response.body.success, false);
+    });
+
+    it("should get a reading by ID", async () => {
+        const response = await agent
+            .get(`/api/readings/${readingId}`);
+
+        assert.equal(response.status, 200);
+        assert.equal(response.body.success, true);
+        assert.equal(response.body.data.id, readingId);
+        assert.equal(response.body.data.value, 120);
+    });
+
+    it("should return 404 for a non-existing reading", async () => {
+        const response = await agent
+            .get(`/api/readings/${randomUUID()}`);
+
+        assert.equal(response.status, 404);
+        assert.equal(response.body.success, false);
+    });
+
+    it("should reject getting a reading without authentication", async () => {
+        const response = await request(app)
+            .get(`/api/readings/${readingId}`);
+
+        assert.equal(response.status, 401);
+        assert.equal(response.body.success, false);
+    });
+
 });

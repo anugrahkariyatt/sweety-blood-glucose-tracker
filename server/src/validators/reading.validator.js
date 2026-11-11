@@ -45,3 +45,4 @@ export const createReadingSchema = z.object({
         .max(600, "Value must be between 40 and 600 mg/dl."),
 });
 
+export const updateReadingSchema = createReadingSchema.partial();
