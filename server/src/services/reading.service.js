@@ -20,6 +20,19 @@ export const createReading = async (userId, data) => {
             slot,
         },
     });
+    const dailyCount = await prisma.reading.count({
+        where: {
+            userId,
+            date: readingDate,
+        },
+    });
+
+    if (dailyCount >= 4) {
+        throw new AppError(
+            "You can add only 4 readings per day.",
+            400
+        );
+    }
 
     if (existingReading) {
         const slotLabel = SLOT_LABELS[slot];
@@ -30,6 +43,7 @@ export const createReading = async (userId, data) => {
             409
         );
     }
+
 
     return await prisma.reading.create({
         data: {

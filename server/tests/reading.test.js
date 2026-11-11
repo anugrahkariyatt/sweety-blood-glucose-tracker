@@ -109,6 +109,41 @@ describe("Reading API - CRUD Operations", () => {
             "You already have a Morning reading for this date."
         );
     });
+    it("should reject more than 4 readings per day", async () => {
+        const slots = [
+            "MORNING",
+            "AFTER_BREAKFAST",
+            "AFTER_LUNCH",
+            "AFTER_DINNER",
+        ];
+
+        for (const slot of slots) {
+            const response = await agent
+                .post("/api/readings")
+                .send({
+                    date: "2026-11-09",
+                    slot,
+                    value: 120,
+                });
+
+            assert.equal(response.status, 201);
+        }
+
+        const response = await agent
+            .post("/api/readings")
+            .send({
+                date: "2026-11-09",
+                slot: "MORNING",
+                value: 130,
+            });
+
+        assert.equal(response.status, 400);
+        assert.equal(response.body.success, false);
+        assert.equal(
+            response.body.message,
+            "You can add only 4 readings per day."
+        );
+    });
 
     it("should reject invalid reading data", async () => {
         const response = await agent
