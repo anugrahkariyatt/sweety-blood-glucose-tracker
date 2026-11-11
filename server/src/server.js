@@ -1,34 +1,33 @@
-
 import express from "express";
+import cors from "cors";
 import "dotenv/config";
-import pool from "./config/db.js";
+import prisma from "./config/prisma.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "Sweety API is running!",
-    });
+  res.status(200).json({
+    success: true,
+    message: "Sweety API is running!",
+  });
 });
 
 const startServer = async () => {
-    try {
-        const result = await pool.query("SELECT NOW()");
+  try {
+    await prisma.$connect();
+    console.log("PostgreSQL connected successfully via Prisma!");
 
-        console.log("PostgreSQL connected successfully!");
-        console.log("Database time:", result.rows[0].now);
-
-        app.listen(PORT, () => {
-            console.log(`Server running on http://localhost:${PORT}`);
-        });
-    } catch (error) {
-        console.error("Database connection failed:", error.message);
-        process.exit(1);
-    }
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Database connection failed:", error.message);
+    process.exit(1);
+  }
 };
 
 startServer();
