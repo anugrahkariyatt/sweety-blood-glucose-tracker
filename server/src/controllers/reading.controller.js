@@ -81,3 +81,25 @@ export const updateReading = async (req, res, next) => {
         next(error);
     }
 };
+
+export const deleteReading = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const reading = await readingService.deleteReading(
+            req.user.userId,
+            id
+        );
+
+        if (!reading) {
+            return next(new AppError("Reading not found.", 404));
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Reading deleted successfully.",
+        });
+    } catch (error) {
+        next(error);
+    }
+};

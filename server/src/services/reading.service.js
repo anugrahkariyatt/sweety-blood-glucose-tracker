@@ -64,3 +64,22 @@ export const updateReading = async (userId, readingId, data) => {
         },
     });
 };
+
+export const deleteReading = async (userId, readingId) => {
+    const existingReading = await prisma.reading.findFirst({
+        where: {
+            id: readingId,
+            userId,
+        },
+    });
+
+    if (!existingReading) {
+        return null;
+    }
+
+    return await prisma.reading.delete({
+        where: {
+            id: readingId,
+        },
+    });
+};

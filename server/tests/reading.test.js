@@ -217,4 +217,39 @@ describe("Reading API - CRUD Operations", () => {
         assert.equal(response.body.success, false);
     });
 
+    it("should delete a reading successfully", async () => {
+        const response = await agent
+            .delete(`/api/readings/${readingId}`);
+
+        assert.equal(response.status, 200);
+        assert.equal(response.body.success, true);
+        assert.equal(
+            response.body.message,
+            "Reading deleted successfully."
+        );
+
+        // Verify database deletion
+        const reading = await prisma.reading.findUnique({
+            where: { id: readingId },
+        });
+
+        assert.equal(reading, null);
+    });
+
+    it("should return 404 when deleting a non-existing reading", async () => {
+        const response = await agent
+            .delete(`/api/readings/${randomUUID()}`);
+
+        assert.equal(response.status, 404);
+        assert.equal(response.body.success, false);
+    });
+
+    it("should reject deleting a reading without authentication", async () => {
+        const response = await request(app)
+            .delete(`/api/readings/${randomUUID()}`);
+
+        assert.equal(response.status, 401);
+        assert.equal(response.body.success, false);
+    });
+
 });
