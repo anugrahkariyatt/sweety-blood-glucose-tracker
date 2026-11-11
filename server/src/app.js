@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
+import reportRoutes from "./routes/report.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import readingRoutes from "./routes/reading.routes.js";
 import errorMiddleware from "./middleware/error.middleware.js";
@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/readings", readingRoutes);
-
+app.use("/api/reports", reportRoutes);
 app.use(errorMiddleware);
 
 
