@@ -91,6 +91,24 @@ describe("Reading API - CRUD Operations", () => {
         assert.equal(reading.userId, userId);
         assert.equal(reading.value, 120);
     });
+    it("should reject duplicate reading slots for the same date", async () => {
+        const readingData = {
+            date: "2026-11-10",
+            slot: "MORNING",
+            value: 130,
+        };
+
+        const response = await agent
+            .post("/api/readings")
+            .send(readingData);
+
+        assert.equal(response.status, 409);
+        assert.equal(response.body.success, false);
+        assert.equal(
+            response.body.message,
+            "You already have a Morning reading for this date."
+        );
+    });
 
     it("should reject invalid reading data", async () => {
         const response = await agent

@@ -1,12 +1,39 @@
 import prisma from "../config/prisma.js";
+import AppError from "../utils/AppError.js";
+const SLOT_LABELS = {
+    MORNING: "Morning",
+    AFTER_BREAKFAST: "After breakfast",
+    AFTER_LUNCH: "After lunch",
+    AFTER_DINNER: "After dinner",
+};
 
 
 export const createReading = async (userId, data) => {
     const { date, slot, value } = data;
 
+    const readingDate = new Date(`${date}T00:00:00.000Z`);
+
+    const existingReading = await prisma.reading.findFirst({
+        where: {
+            userId,
+            date: readingDate,
+            slot,
+        },
+    });
+
+    if (existingReading) {
+        const slotLabel = SLOT_LABELS[slot];
+        const article = slot === "MORNING" ? "a" : "an";
+
+        throw new AppError(
+            `You already have ${article} ${slotLabel} reading for this date.`,
+            409
+        );
+    }
+
     return await prisma.reading.create({
         data: {
-            date: new Date(`${date}T00:00:00.000Z`),
+            date: readingDate,
             slot,
             value,
             userId,
