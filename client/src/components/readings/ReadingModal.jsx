@@ -48,7 +48,7 @@ export default function ReadingModal({
 
   const validate = () => {
     if (!formData.date) {
-      return 'Date is required.';
+      return 'Please select a date.';
     }
 
     const todayStr = new Date().toISOString().split('T')[0];
@@ -57,7 +57,7 @@ export default function ReadingModal({
     }
 
     if (!formData.slot) {
-      return 'Please choose a reading slot.';
+      return 'Please select a time slot.';
     }
 
     if (
@@ -65,16 +65,12 @@ export default function ReadingModal({
       formData.value === null ||
       formData.value === undefined
     ) {
-      return 'Glucose value is required.';
+      return 'Please enter a glucose value.';
     }
 
     const numVal = Number(formData.value);
-    if (!Number.isInteger(numVal)) {
-      return 'Glucose level must be a whole integer.';
-    }
-
-    if (numVal < 40 || numVal > 600) {
-      return 'Glucose level must be between 40 and 600 mg/dl.';
+    if (!Number.isInteger(numVal) || numVal < 40 || numVal > 600) {
+      return 'Value must be between 40 and 600 mg/dl.';
     }
 
     return null;
