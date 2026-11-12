@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import readingService from '../services/readingService.js';
 import AppLayout from '../components/layout/AppLayout.jsx';
 import ReadingModal from '../components/readings/ReadingModal.jsx';
@@ -8,6 +8,8 @@ import { Plus } from 'lucide-react';
 
 export default function Readings() {
   const [readings, setReadings] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   // Modal states for Add and Edit
@@ -18,22 +20,32 @@ export default function Readings() {
   const [deletingReading, setDeletingReading] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchReadings = async () => {
+  const fetchReadings = useCallback(async (targetPage = page) => {
     try {
-      const res = await readingService.getReadings();
+      setLoading(true);
+      const res = await readingService.getReadings({ page: targetPage, limit: 20 });
       if (res?.success && Array.isArray(res?.data)) {
         setReadings(res.data);
+        if (res.pagination) {
+          setPagination(res.pagination);
+          setPage(res.pagination.page);
+        }
       }
     } catch (err) {
       console.error('Failed to load readings:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
 
   useEffect(() => {
-    fetchReadings();
+    fetchReadings(1);
   }, []);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    fetchReadings(newPage);
+  };
 
   const handleAddNewClick = () => {
     setEditingReading(null);
@@ -54,7 +66,7 @@ export default function Readings() {
       } else {
         await readingService.createReading(formData);
       }
-      await fetchReadings();
+      await fetchReadings(page);
       setIsModalOpen(false);
     } finally {
       setActionLoading(false);
@@ -67,7 +79,7 @@ export default function Readings() {
     setActionLoading(true);
     try {
       await readingService.deleteReading(deletingReading.id);
-      await fetchReadings();
+      await fetchReadings(page);
       setDeletingReading(null);
     } catch (err) {
       console.error('Failed to delete reading:', err);
@@ -109,6 +121,8 @@ export default function Readings() {
         ) : (
           <ReadingTable
             readings={readings}
+            pagination={pagination}
+            onPageChange={handlePageChange}
             onEdit={handleOpenEdit}
             onDelete={(reading) => setDeletingReading(reading)}
             onAddNew={handleAddNewClick}

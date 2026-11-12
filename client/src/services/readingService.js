@@ -1,8 +1,8 @@
 import api from '../api/axios.js';
 
 export const readingService = {
-  async getReadings() {
-    const response = await api.get('/readings');
+  async getReadings(params = {}) {
+    const response = await api.get('/readings', { params });
     return response.data;
   },
 

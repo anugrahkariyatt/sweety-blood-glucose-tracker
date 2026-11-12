@@ -21,14 +21,17 @@ export const createReading = async (req, res, next) => {
 
 export const getReadings = async (req, res, next) => {
     try {
-        const readings = await readingService.getReadings(
-            req.user.userId
+        const { page, limit } = req.query;
+        const result = await readingService.getReadings(
+            req.user.userId,
+            { page, limit }
         );
 
         res.status(200).json({
             success: true,
-            count: readings.length,
-            data: readings,
+            count: result.data.length,
+            data: result.data,
+            pagination: result.pagination,
         });
     } catch (error) {
         next(error);

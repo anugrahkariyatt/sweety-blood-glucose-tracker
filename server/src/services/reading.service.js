@@ -56,15 +56,42 @@ export const createReading = async (userId, data) => {
 };
 
 
-export const getReadings = async (userId) => {
-    return await prisma.reading.findMany({
-        where: {
-            userId,
+export const getReadings = async (userId, options = {}) => {
+    const { page, limit } = options;
+
+    const where = { userId };
+    const orderBy = [
+        { date: "desc" },
+        { slot: "asc" },
+    ];
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [totalCount, data] = await Promise.all([
+        prisma.reading.count({ where }),
+        prisma.reading.findMany({
+            where,
+            orderBy,
+            skip,
+            take: limitNum,
+        }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limitNum) || 1;
+
+    return {
+        data,
+        pagination: {
+            page: pageNum,
+            limit: limitNum,
+            totalCount,
+            totalPages,
+            hasNextPage: pageNum < totalPages,
+            hasPrevPage: pageNum > 1,
         },
-        orderBy: {
-            date: "desc",
-        },
-    });
+    };
 };
 
 export const getReadingById = async (userId, readingId) => {

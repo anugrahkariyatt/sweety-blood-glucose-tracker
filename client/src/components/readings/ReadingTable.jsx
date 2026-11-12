@@ -1,8 +1,15 @@
 import React from 'react';
 import { SLOT_LABELS, getGlucoseStatus } from '../../utils/constants.jsx';
-import { Calendar, Edit2, HeartPulse, Trash2 } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Edit2, HeartPulse, Trash2 } from 'lucide-react';
 
-export default function ReadingTable({ readings, onEdit, onDelete, onAddNew }) {
+export default function ReadingTable({
+  readings,
+  pagination,
+  onPageChange,
+  onEdit,
+  onDelete,
+  onAddNew,
+}) {
   if (!readings || readings.length === 0) {
     return (
       <div className="bg-white rounded-2xl p-8 sm:p-12 text-center border border-slate-200/80 shadow-sm">
@@ -175,6 +182,66 @@ export default function ReadingTable({ readings, onEdit, onDelete, onAddNew }) {
           </table>
         </div>
       </div>
+
+      {/* Pagination Footer */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-slate-100 px-1">
+          <div className="text-xs text-slate-500 font-medium">
+            Showing{' '}
+            <span className="font-semibold text-slate-800">
+              {(pagination.page - 1) * pagination.limit + 1}
+            </span>{' '}
+            to{' '}
+            <span className="font-semibold text-slate-800">
+              {Math.min(pagination.page * pagination.limit, pagination.totalCount)}
+            </span>{' '}
+            of{' '}
+            <span className="font-semibold text-slate-800">
+              {pagination.totalCount}
+            </span>{' '}
+            readings
+          </div>
+
+          <div className="flex items-center gap-1.5 self-center sm:self-auto">
+            <button
+              type="button"
+              onClick={() => onPageChange(pagination.page - 1)}
+              disabled={!pagination.hasPrevPage}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Previous</span>
+            </button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => onPageChange(p)}
+                  className={`w-8 h-8 rounded-xl text-xs font-bold transition flex items-center justify-center ${
+                    pagination.page === p
+                      ? 'bg-[#5b50e5] text-white shadow-xs'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onPageChange(pagination.page + 1)}
+              disabled={!pagination.hasNextPage}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
