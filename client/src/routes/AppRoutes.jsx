@@ -3,21 +3,45 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import Login from '../pages/Login.jsx';
 import Register from '../pages/Register.jsx';
-import Home from '../pages/Home.jsx';
+import Dashboard from '../pages/Dashboard.jsx';
+import Readings from '../pages/Readings.jsx';
 
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* Public Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Protected Dashboard Route */}
       <Route
         path="/"
         element={
           <ProtectedRoute>
-            <Home />
+            <Dashboard />
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected Readings Route */}
+      <Route
+        path="/readings"
+        element={
+          <ProtectedRoute>
+            <Readings />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
