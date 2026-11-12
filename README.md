@@ -3,6 +3,11 @@
 Sweety is a full-stack healthcare web application designed for diabetes patients to track their daily blood glucose levels across 4 standard daily time slots, view interactive monthly trend charts, and generate automated summary reports.
 
 ---
+## Demo Video
+🎬 **[Click Here to Watch the 3-Minute App Demo](https://drive.google.com/file/d/1oX-ACm8O7T7B9gu0WuiFGzlhSmomWShO/view?usp=sharing)**
+
+---
+
 
 ## Table of Contents
 1. [Features](#features)
