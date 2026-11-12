@@ -92,13 +92,36 @@ export const updateReading = async (userId, readingId, data) => {
         return null;
     }
 
+    const targetDate = date ? new Date(`${date}T00:00:00.000Z`) : existingReading.date;
+    const targetSlot = slot || existingReading.slot;
+
+    if (date !== undefined || slot !== undefined) {
+        const duplicateSlot = await prisma.reading.findFirst({
+            where: {
+                userId,
+                date: targetDate,
+                slot: targetSlot,
+                NOT: { id: readingId },
+            },
+        });
+
+        if (duplicateSlot) {
+            const slotLabel = SLOT_LABELS[targetSlot];
+            const article = targetSlot === "MORNING" ? "a" : "an";
+            throw new AppError(
+                `You already have ${article} ${slotLabel} reading for this date.`,
+                409
+            );
+        }
+    }
+
     return await prisma.reading.update({
         where: {
             id: readingId,
         },
         data: {
             ...(date !== undefined && {
-                date: new Date(`${date}T00:00:00.000Z`),
+                date: targetDate,
             }),
             ...(slot !== undefined && { slot }),
             ...(value !== undefined && { value }),

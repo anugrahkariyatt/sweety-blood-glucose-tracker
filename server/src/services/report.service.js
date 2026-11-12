@@ -1,6 +1,5 @@
 import prisma from "../config/prisma.js";
 
-// Helper to calculate statistics
 const calculateStats = (readings) => {
     const count = readings.length;
 
@@ -82,8 +81,15 @@ export const getMonthToDateReport = async (userId, date) => {
                 lte: endDate,
             },
         },
+        orderBy: [
+            { date: "asc" },
+            { slot: "asc" },
+        ],
         select: {
+            id: true,
             value: true,
+            slot: true,
+            date: true,
         },
     });
 
@@ -93,6 +99,7 @@ export const getMonthToDateReport = async (userId, date) => {
         startDate: startDateStr,
         endDate: endDateStr,
         ...stats,
+        readings,
         ...(stats.count === 0 && {
             message: "No readings found for this period.",
         }),
@@ -130,8 +137,15 @@ export const getMonthlyReport = async (userId, date) => {
                 lte: endDate,
             },
         },
+        orderBy: [
+            { date: "asc" },
+            { slot: "asc" },
+        ],
         select: {
+            id: true,
             value: true,
+            slot: true,
+            date: true,
         },
     });
 
@@ -141,6 +155,7 @@ export const getMonthlyReport = async (userId, date) => {
         startDate: startDateStr,
         endDate: endDateStr,
         ...stats,
+        readings,
         ...(stats.count === 0 && {
             message: "No readings found for this period.",
         }),

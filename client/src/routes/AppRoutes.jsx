@@ -5,6 +5,7 @@ import Login from '../pages/Login.jsx';
 import Register from '../pages/Register.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import Readings from '../pages/Readings.jsx';
+import Reports from '../pages/Reports.jsx';
 
 export default function AppRoutes() {
   return (
@@ -37,6 +38,16 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute>
             <Readings />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected Reports Route */}
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute>
+            <Reports />
           </ProtectedRoute>
         }
       />
