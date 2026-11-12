@@ -12,3 +12,9 @@ build/
 
 # Test coverage
 coverage/
+
+# Logs & OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
