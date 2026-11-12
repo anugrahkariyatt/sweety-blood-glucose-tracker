@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
 import AppError from "../utils/AppError.js";
+import { invalidateUserReportCache } from "../config/redis.js";
 const SLOT_LABELS = {
     MORNING: "Morning",
     AFTER_BREAKFAST: "After breakfast",
@@ -45,7 +46,7 @@ export const createReading = async (userId, data) => {
     }
 
 
-    return await prisma.reading.create({
+    const created = await prisma.reading.create({
         data: {
             date: readingDate,
             slot,
@@ -53,6 +54,10 @@ export const createReading = async (userId, data) => {
             userId,
         },
     });
+
+    await invalidateUserReportCache(userId);
+
+    return created;
 };
 
 
@@ -142,7 +147,7 @@ export const updateReading = async (userId, readingId, data) => {
         }
     }
 
-    return await prisma.reading.update({
+    const updated = await prisma.reading.update({
         where: {
             id: readingId,
         },
@@ -154,6 +159,10 @@ export const updateReading = async (userId, readingId, data) => {
             ...(value !== undefined && { value }),
         },
     });
+
+    await invalidateUserReportCache(userId);
+
+    return updated;
 };
 
 export const deleteReading = async (userId, readingId) => {
@@ -168,9 +177,13 @@ export const deleteReading = async (userId, readingId) => {
         return null;
     }
 
-    return await prisma.reading.delete({
+    const deleted = await prisma.reading.delete({
         where: {
             id: readingId,
         },
     });
+
+    await invalidateUserReportCache(userId);
+
+    return deleted;
 };

@@ -1,4 +1,5 @@
 import prisma from "../config/prisma.js";
+import { getCache, setCache } from "../config/redis.js";
 
 const calculateStats = (readings) => {
     const count = readings.length;
@@ -26,8 +27,13 @@ const calculateStats = (readings) => {
     };
 };
 
-
 export const getDailyReport = async (userId, date) => {
+    const cacheKey = `reports:${userId}:daily:${date}`;
+    const cached = await getCache(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
     const reportDate = new Date(`${date}T00:00:00.000Z`);
 
     const readings = await prisma.reading.findMany({
@@ -48,24 +54,33 @@ export const getDailyReport = async (userId, date) => {
 
     const stats = calculateStats(readings);
 
+    let result;
     if (stats.count === 0) {
-        return {
+        result = {
             date,
             ...stats,
             readings: [],
             message: "No readings found for this date.",
         };
+    } else {
+        result = {
+            date,
+            ...stats,
+            readings,
+        };
     }
 
-    return {
-        date,
-        ...stats,
-        readings,
-    };
+    await setCache(cacheKey, result);
+    return result;
 };
 
-
 export const getMonthToDateReport = async (userId, date) => {
+    const cacheKey = `reports:${userId}:month-to-date:${date}`;
+    const cached = await getCache(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
     const [year, month] = date.split("-");
     const startDateStr = `${year}-${month}-01`;
     const endDateStr = date;
@@ -95,7 +110,7 @@ export const getMonthToDateReport = async (userId, date) => {
 
     const stats = calculateStats(readings);
 
-    return {
+    const result = {
         startDate: startDateStr,
         endDate: endDateStr,
         ...stats,
@@ -104,10 +119,18 @@ export const getMonthToDateReport = async (userId, date) => {
             message: "No readings found for this period.",
         }),
     };
+
+    await setCache(cacheKey, result);
+    return result;
 };
 
-
 export const getMonthlyReport = async (userId, date) => {
+    const cacheKey = `reports:${userId}:monthly:${date}`;
+    const cached = await getCache(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
     const [yearNum, monthNum] = date.split("-").map(Number);
 
     let prevYear = yearNum;
@@ -151,7 +174,7 @@ export const getMonthlyReport = async (userId, date) => {
 
     const stats = calculateStats(readings);
 
-    return {
+    const result = {
         startDate: startDateStr,
         endDate: endDateStr,
         ...stats,
@@ -160,4 +183,7 @@ export const getMonthlyReport = async (userId, date) => {
             message: "No readings found for this period.",
         }),
     };
+
+    await setCache(cacheKey, result);
+    return result;
 };
